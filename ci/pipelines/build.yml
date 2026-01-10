@@ -9,12 +9,25 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+
 steps:
+- bash: |
+    # Start from the repo name (e.g. "VojtaKai.kubernetes-course")
+    raw='$(Build.Repository.Name)'
+
+    # Lowercase + replace any invalid char with '-'
+    safe=$(echo "$raw" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g' | sed -E 's/^-+//; s/-+$//')
+
+    echo "Raw repo:  $raw"
+    echo "Safe name: $safe"
+    echo "##vso[task.setvariable variable=composeProject]$safe"
+  displayName: "Compute docker compose project name"
 - task: DockerCompose@1
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    dockerComposeFile: '**/docker-compose.yml'
-    additionalDockerComposeFiles: '../ci/docker-compose.ci.yml'
+    dockerComposeFile: '$(Build.SourcesDirectory)/src/docker-compose.yml'
+    projectName: '$(composeProject)'
+    additionalDockerComposeFiles: '$(Build.SourcesDirectory)/ci/docker-compose.ci.yml'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'up'
     arguments: '--build --force-recreate -d'
