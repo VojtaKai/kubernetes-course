@@ -25,9 +25,9 @@ steps:
 - task: DockerCompose@1
   inputs:
     containerregistrytype: 'Azure Container Registry'
-    dockerComposeFile: '$(Build.SourcesDirectory)/src/docker-compose.yml'
+    dockerComposeFile: 'src/docker-compose.yml'
     projectName: '$(composeProject)'
-    additionalDockerComposeFiles: '$(Build.SourcesDirectory)/ci/docker-compose.ci.yml'
+    additionalDockerComposeFiles: 'ci/docker-compose.ci.yml'
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'up'
     arguments: '--build --force-recreate -d'
