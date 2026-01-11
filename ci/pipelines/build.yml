@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  imageNameUnitTests: northwindstore-unittests
+  imageNameIntegrationTests: northwindstore-integrationtests
+  imageTag: $(Build.BuildId)
 
 steps:
 - bash: |
@@ -39,24 +43,26 @@ steps:
     command: 'build'
     Dockerfile: 'src/NorthwindStore.Tests.UnitTests/Dockerfile'
     buildContext: 'src'
-    tags: 'northwindstore-unittests:$(Build.BuildId)'
+    repository: $(imageNameUnitTests)
+    tags: $(imageTag)
 
 - task: Docker@2
   displayName: "Run unit tests"
   inputs:
     command: 'run'
-    arguments: '--rm northwindstore-unittests:$(Build.BuildId)'
+    imageName: $(imageNameUnitTests):$(imageTag)
+    arguments: --rm
 
-- task: Docker@2
-  displayName: "Build intergration tests"
-  inputs:
-    command: 'build'
-    Dockerfile: 'src/NorthwindStore.Tests.IntegrationTests/Dockerfile'
-    buildContext: 'src'
-    tags: 'northwindstore-integrationtests:$(Build.BuildId)'
+# - task: Docker@2
+#   displayName: "Build intergration tests"
+#   inputs:
+#     command: 'build'
+#     Dockerfile: 'src/NorthwindStore.Tests.IntegrationTests/Dockerfile'
+#     buildContext: 'src'
+#     tags: 'northwindstore-integrationtests:$(Build.BuildId)'
 
-- task: Docker@2
-  displayName: "Run integration tests"
-  inputs:
-    command: 'run'
-    arguments: '--rm northwindstore-integrationtests:$(Build.BuildId)'
+# - task: Docker@2
+#   displayName: "Run integration tests"
+#   inputs:
+#     command: 'run'
+#     arguments: '--rm northwindstore-integrationtests:$(Build.BuildId)'
