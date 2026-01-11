@@ -5,17 +5,10 @@ services:
       - ASPNETCORE_URLS=http://+:80
       - ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1
     ports:
-      - "5000:80"
-    volumes:
-      - ~/Library/Application\ Support/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ~/Library/Application\ Support/ASP.NET/Https:/root/.aspnet/https:ro
+      - "80"
     networks:
       - northwindstore-dev
   northwindstore.db:
-    ports:
-      - "51433:1433"
-    volumes:
-      - /Users/vojtechkaiser/projects/kubernetes-course/temp/sqldata:/var/opt/mssql/data
     networks:
       - northwindstore-dev
 
