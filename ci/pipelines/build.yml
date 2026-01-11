@@ -65,4 +65,4 @@ steps:
 #   displayName: "Run integration tests"
 #   inputs:
 #     command: 'run'
-#     arguments: '--rm northwindstore-integrationtests:$(Build.BuildId)'
+#     arguments: '--rm -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev northwindstore-integrationtests:$(Build.BuildId)'
