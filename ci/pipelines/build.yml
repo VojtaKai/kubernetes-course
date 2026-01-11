@@ -23,6 +23,7 @@ steps:
     echo "##vso[task.setvariable variable=composeProject]$safe"
   displayName: "Compute docker compose project name"
 - task: DockerCompose@1
+  displayName: "Docker compose up - app and db"
   inputs:
     containerregistrytype: 'Azure Container Registry'
     dockerComposeFile: 'src/docker-compose.yml'
@@ -33,6 +34,7 @@ steps:
     arguments: '--build --force-recreate -d'
 
 - task: Docker@2
+  displayName: "Build unit tests image"
   inputs:
     command: 'build'
     Dockerfile: 'src/NorthwindStore.Tests.UnitTests/Dockerfile'
@@ -40,6 +42,7 @@ steps:
     tags: 'northwindstore-unittests:$(Build.BuildId)'
 
 - task: Docker@2
+  displayName: "Run unit tests"
   inputs:
     command: 'run'
     arguments: '--rm northwindstore-unittests:$(Build.BuildId)'
