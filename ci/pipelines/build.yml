@@ -10,9 +10,13 @@ pool:
   vmImage: ubuntu-latest
 
 variables:
+  imageNameApp: vojtakai-kubernetes-course_northwindstore.app_1
+  imageNameDB: vojtakai-kubernetes-course_northwindstore.db_1
   imageNameUnitTests: northwindstore-unittests
   imageNameIntegrationTests: northwindstore-integrationtests
   imageTag: $(Build.BuildId)
+  containerRepository: 'northwindstore/app'
+  containerRegistry: 'robotdreams.azurecr.io'
 
 steps:
 - bash: |
@@ -75,6 +79,26 @@ steps:
     testResultsFiles: '*.trx'
     searchFolder: '$(Build.ArtifactStagingDirectory)/testresults'
     failTaskOnFailedTests: true
+
+- task: Docker@2
+  displayName: "Docker tag - app - latest"
+  inputs:
+    command: 'tag'
+    arguments: 'vojtakai-kubernetes-course_northwindstore.app_1 $(containerRegistry)/$(containerRepository):latest'
+- task: Docker@2
+  displayName: "Docker tag - app - buildId"
+  inputs:
+    command: 'tag'
+    arguments: 'vojtakai-kubernetes-course_northwindstore.app_1 $(containerRegistry)/$(containerRepository):$(imageTag)'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'sp-ado-acr-push'
+    repository: $(containerRepository)
+    command: 'push'
+    tags: |
+      $(imageTag)
+      latest
 
 - task: DockerCompose@1
   displayName: "Tear down docker compose"
