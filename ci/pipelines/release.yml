@@ -4,16 +4,30 @@
 # https://aka.ms/yaml
 
 trigger:
-- main
+- azure-ci-pipeline
 
 pool:
   vmImage: ubuntu-latest
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: DownloadBuildArtifacts@1
+  inputs:
+    buildType: 'current'
+    downloadType: 'single'
+    artifactName: 'app'
+    downloadPath: '$(System.ArtifactsDirectory)'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: HelmDeploy@1
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscription: '953dfd1d-b9e0-46c2-a58d-c644f04794e3'
+    azureResourceGroup: 'Kubernetes-Course'
+    kubernetesCluster: 'robot-dreams-cluster'
+    namespace: 'northwindstore-helm'
+    command: 'upgrade'
+    chartType: 'FilePath'
+    chartPath: '$(System.ArtifactsDirectory)/app/Chart.yaml'
+    releaseName: 'northwindstore'
+    overrideValues: 'ingress.hosts[0].host=helm.northwindstore.local, ingress.hosts[0].paths[0].path=/, ingress.hosts[0].paths[0].pathType=Prefix, ingress.tls[0].hosts[0]=helm.northwindstore.local, ingress.tls[0].secretName=ingress-tls'
+    valueFile: 'ci/app/values.yaml'
+    arguments: --install
