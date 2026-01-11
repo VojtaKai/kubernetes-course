@@ -9,11 +9,116 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  imageNameApp: vojtakai-kubernetes-course_northwindstore.app_1
+  imageNameDB: vojtakai-kubernetes-course_northwindstore.db_1
+  imageNameUnitTests: northwindstore-unittests
+  imageNameIntegrationTests: northwindstore-integrationtests
+  imageTag: $(Build.BuildId)
+  containerRepository: 'northwindstore/app'
+  containerRegistry: 'robotdreams.azurecr.io'
+
 steps:
+- bash: |
+    # Start from the repo name (e.g. "VojtaKai.kubernetes-course")
+    raw='$(Build.Repository.Name)'
+
+    # Lowercase + replace any invalid char with '-'
+    safe=$(echo "$raw" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9_-]+/-/g' | sed -E 's/^-+//; s/-+$//')
+
+    echo "Raw repo:  $raw"
+    echo "Safe name: $safe"
+    echo "##vso[task.setvariable variable=composeProject]$safe"
+  displayName: "Compute docker compose project name"
+- task: DockerCompose@1
+  displayName: "Docker compose up - app and db"
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    dockerComposeFile: 'src/docker-compose.yml'
+    projectName: '$(composeProject)'
+    additionalDockerComposeFiles: '../ci/docker-compose.ci.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'up'
+    arguments: '--build --force-recreate -d'
+
 - task: Bash@3
+  displayName: "Print image names"
   inputs:
     targetType: 'inline'
-    script: |
-      # Write your commands here
-      
-      echo 'Hello world'
+    script: 'docker images'
+
+- task: Docker@2
+  displayName: "Build unit tests"
+  inputs:
+    command: 'build'
+    Dockerfile: 'src/NorthwindStore.Tests.UnitTests/Dockerfile'
+    buildContext: 'src'
+    repository: $(imageNameUnitTests)
+    tags: $(imageTag)
+
+- task: Docker@2
+  displayName: "Run unit tests"
+  inputs:
+    command: 'run'
+    arguments: '--rm -v $(Build.ArtifactStagingDirectory)/testresults:/src/testresults $(imageNameUnitTests):$(imageTag)'
+  continueOnError: true
+
+- task: Docker@2
+  displayName: "Build intergration tests"
+  inputs:
+    command: 'build'
+    Dockerfile: 'src/NorthwindStore.Tests.IntegrationTests/Dockerfile'
+    buildContext: 'src'
+    repository: $(imageNameIntegrationTests)
+    tags: $(imageTag)
+
+- task: Docker@2
+  displayName: "Run integration tests"
+  inputs:
+    command: 'run'
+    arguments: '--rm -v $(Build.ArtifactStagingDirectory)/testresults:/src/testresults -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev $(imageNameIntegrationTests):$(imageTag)'
+  continueOnError: true
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '*.trx'
+    searchFolder: '$(Build.ArtifactStagingDirectory)/testresults'
+    failTaskOnFailedTests: true
+
+- task: Docker@2
+  displayName: "Docker tag - app - latest"
+  inputs:
+    command: 'tag'
+    arguments: 'northwindstoreapp:latest $(containerRegistry)/$(containerRepository):latest'
+- task: Docker@2
+  displayName: "Docker tag - app - buildId"
+  inputs:
+    command: 'tag'
+    arguments: 'northwindstoreapp:latest $(containerRegistry)/$(containerRepository):$(imageTag)'
+
+- task: Docker@2
+  inputs:
+    containerRegistry: 'sp-ado-acr-push'
+    repository: $(containerRepository)
+    command: 'push'
+    tags: |
+      $(imageTag)
+      latest
+
+- task: DockerCompose@1
+  displayName: "Tear down docker compose"
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    dockerComposeFile: 'src/docker-compose.yml'
+    projectName: '$(composeProject)'
+    additionalDockerComposeFiles: '../ci/docker-compose.ci.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'down'
+  condition: always()
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'ci/app'
+    ArtifactName: 'app'
+    publishLocation: 'Container'
