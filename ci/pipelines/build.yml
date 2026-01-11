@@ -31,3 +31,15 @@ steps:
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'up'
     arguments: '--build --force-recreate -d'
+
+- task: Docker@2
+  inputs:
+    command: 'build'
+    Dockerfile: 'src/NorthwindStore.Tests.UnitTests/Dockerfile'
+    buildContext: 'src'
+    tags: 'northwindstore-unittests:$(Build.BuildId)'
+
+- task: Docker@2
+  inputs:
+    command: 'run'
+    arguments: '--rm northwindstore-unittests:$(Build.BuildId)'
