@@ -50,7 +50,7 @@ steps:
   displayName: "Run unit tests"
   inputs:
     command: 'run'
-    arguments: '--rm $(imageNameUnitTests):$(imageTag)'
+    arguments: '--rm -v $(Build.ArtifactStagingDirectory)/testresults:/src/testresults $(imageNameUnitTests):$(imageTag)'
 
 - task: Docker@2
   displayName: "Build intergration tests"
@@ -65,4 +65,4 @@ steps:
   displayName: "Run integration tests"
   inputs:
     command: 'run'
-    arguments: '--rm -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev $(imageNameIntegrationTests):$(imageTag)'
+    arguments: '--rm -v $(Build.ArtifactStagingDirectory)/testresults:/src/testresults -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev $(imageNameIntegrationTests):$(imageTag)'
