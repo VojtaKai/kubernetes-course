@@ -31,7 +31,12 @@ steps:
     namespace: 'northwindstore-helm'
     command: 'upgrade'
     chartType: 'FilePath'
-    chartPath: '$(System.ArtifactsDirectory)/app/Chart.yaml'
+    chartPath: '$(System.ArtifactsDirectory)/app'
     releaseName: 'northwindstore'
-    overrideValues: 'ingress.hosts[0].host=helm.northwindstore.local, ingress.hosts[0].paths[0].path=/, ingress.hosts[0].paths[0].pathType=Prefix, ingress.tls[0].hosts[0]=helm.northwindstore.local, ingress.tls[0].secretName=ingress-tls'
+    overrideValues: |
+      ingress.hosts[0].host=helm.northwindstore.local,
+      ingress.hosts[0].paths[0].path=/,
+      ingress.hosts[0].paths[0].pathType=Prefix,
+      ingress.tls[0].hosts[0]=helm.northwindstore.local,
+      ingress.tls[0].secretName=ingress-tls
     valueFile: '$(System.ArtifactsDirectory)/app/values.yaml'
