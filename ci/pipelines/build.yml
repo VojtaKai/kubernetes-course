@@ -51,6 +51,7 @@ steps:
   inputs:
     command: 'run'
     arguments: '--rm -v $(Build.ArtifactStagingDirectory)/testresults:/src/testresults $(imageNameUnitTests):$(imageTag)'
+  continueOnError: true
 
 - task: Docker@2
   displayName: "Build intergration tests"
@@ -66,3 +67,11 @@ steps:
   inputs:
     command: 'run'
     arguments: '--rm -v $(Build.ArtifactStagingDirectory)/testresults:/src/testresults -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev $(imageNameIntegrationTests):$(imageTag)'
+  continueOnError: true
+
+- task: PublishTestResults@2
+  inputs:
+    testResultsFormat: 'VSTest'
+    testResultsFiles: '*.trx'
+    searchFolder: '$(Build.ArtifactStagingDirectory)/testresults'
+    failTaskOnFailedTests: true
