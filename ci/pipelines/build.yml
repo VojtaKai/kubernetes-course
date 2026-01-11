@@ -75,3 +75,14 @@ steps:
     testResultsFiles: '*.trx'
     searchFolder: '$(Build.ArtifactStagingDirectory)/testresults'
     failTaskOnFailedTests: true
+
+- task: DockerCompose@1
+  displayName: "Tear down docker compose"
+  inputs:
+    containerregistrytype: 'Azure Container Registry'
+    dockerComposeFile: 'src/docker-compose.yml'
+    projectName: '$(composeProject)'
+    additionalDockerComposeFiles: '../ci/docker-compose.ci.yml'
+    action: 'Run a Docker Compose command'
+    dockerComposeCommand: 'down'
+  condition: always()
