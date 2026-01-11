@@ -116,3 +116,9 @@ steps:
     action: 'Run a Docker Compose command'
     dockerComposeCommand: 'down'
   condition: always()
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: 'ci/app'
+    ArtifactName: 'app'
+    publishLocation: 'Container'
