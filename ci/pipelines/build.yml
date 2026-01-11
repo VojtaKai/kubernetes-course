@@ -9,6 +9,10 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 
+variables:
+  imageNameUnitTests: northwindstore-unittests
+  imageNameIntegrationTests: northwindstore-integrationtests
+  imageTag: $(Build.BuildId)
 
 steps:
 - bash: |
@@ -22,27 +26,43 @@ steps:
     echo "Safe name: $safe"
     echo "##vso[task.setvariable variable=composeProject]$safe"
   displayName: "Compute docker compose project name"
-- task: DockerCompose@1
-  displayName: "Docker compose up - app and db"
-  inputs:
-    containerregistrytype: 'Azure Container Registry'
-    dockerComposeFile: 'src/docker-compose.yml'
-    projectName: '$(composeProject)'
-    additionalDockerComposeFiles: '../ci/docker-compose.ci.yml'
-    action: 'Run a Docker Compose command'
-    dockerComposeCommand: 'up'
-    arguments: '--build --force-recreate -d'
+# - task: DockerCompose@1
+#   displayName: "Docker compose up - app and db"
+#   inputs:
+#     containerregistrytype: 'Azure Container Registry'
+#     dockerComposeFile: 'src/docker-compose.yml'
+#     projectName: '$(composeProject)'
+#     additionalDockerComposeFiles: '../ci/docker-compose.ci.yml'
+#     action: 'Run a Docker Compose command'
+#     dockerComposeCommand: 'up'
+#     arguments: '--build --force-recreate -d'
 
 - task: Docker@2
-  displayName: "Build unit tests image"
+  displayName: "Build unit tests"
   inputs:
     command: 'build'
     Dockerfile: 'src/NorthwindStore.Tests.UnitTests/Dockerfile'
     buildContext: 'src'
-    tags: 'northwindstore-unittests:$(Build.BuildId)'
+    repository: $(imageNameUnitTests)
+    tags: $(imageTag)
 
 - task: Docker@2
   displayName: "Run unit tests"
   inputs:
     command: 'run'
-    arguments: '--rm northwindstore-unittests:$(Build.BuildId)'
+    arguments: '--rm $(imageNameUnitTests):$(imageTag)'
+
+- task: Docker@2
+  displayName: "Build intergration tests"
+  inputs:
+    command: 'build'
+    Dockerfile: 'src/NorthwindStore.Tests.IntegrationTests/Dockerfile'
+    buildContext: 'src'
+    repository: $(imageNameIntegrationTests)
+    tags: $(imageTag)
+
+- task: Docker@2
+  displayName: "Run integration tests"
+  inputs:
+    command: 'run'
+    arguments: '--rm -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev $(imageNameIntegrationTests):$(imageTag)'
