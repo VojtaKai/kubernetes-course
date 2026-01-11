@@ -10,14 +10,24 @@ pool:
   vmImage: ubuntu-latest
 
 steps:
+# - task: DownloadBuildArtifacts@1
+#   inputs:
+#     buildType: 'specific'
+#     project: '75f14b00-96a5-4d30-b29a-38817d667b10'
+#     pipeline: '1'
+#     specificBuildWithTriggering: true
+#     buildVersionToDownload: 'specific'
+#     buildId: '44'
+#     downloadType: 'single'
+#     artifactName: 'app'
+#     downloadPath: '$(System.ArtifactsDirectory)'
+
 - task: DownloadBuildArtifacts@1
   inputs:
     buildType: 'specific'
     project: '75f14b00-96a5-4d30-b29a-38817d667b10'
     pipeline: '1'
-    specificBuildWithTriggering: true
-    buildVersionToDownload: 'specific'
-    buildId: '44'
+    buildVersionToDownload: 'latest'
     downloadType: 'single'
     artifactName: 'app'
     downloadPath: '$(System.ArtifactsDirectory)'
