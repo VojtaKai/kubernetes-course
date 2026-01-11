@@ -52,16 +52,17 @@ steps:
     command: 'run'
     arguments: '--rm $(imageNameUnitTests):$(imageTag)'
 
-# - task: Docker@2
-#   displayName: "Build intergration tests"
-#   inputs:
-#     command: 'build'
-#     Dockerfile: 'src/NorthwindStore.Tests.IntegrationTests/Dockerfile'
-#     buildContext: 'src'
-#     tags: 'northwindstore-integrationtests:$(Build.BuildId)'
+- task: Docker@2
+  displayName: "Build intergration tests"
+  inputs:
+    command: 'build'
+    Dockerfile: 'src/NorthwindStore.Tests.IntegrationTests/Dockerfile'
+    buildContext: 'src'
+    repository: $(imageNameIntegrationTests)
+    tags: $(imageTag)
 
-# - task: Docker@2
-#   displayName: "Run integration tests"
-#   inputs:
-#     command: 'run'
-#     arguments: '--rm -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev northwindstore-integrationtests:$(Build.BuildId)'
+- task: Docker@2
+  displayName: "Run integration tests"
+  inputs:
+    command: 'run'
+    arguments: '--rm -e "ConnectionStrings__DB=Data Source=tcp:northwindstore.db,1433; Initial Catalog=Northwind; User ID=sa; Password=DevPass_1" --network northwindstore-dev imageNameIntegrationTests:$(imageTag)'
