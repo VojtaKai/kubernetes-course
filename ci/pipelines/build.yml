@@ -50,8 +50,7 @@ steps:
   displayName: "Run unit tests"
   inputs:
     command: 'run'
-    imageName: $(imageNameUnitTests):$(imageTag)
-    arguments: --rm
+    arguments: '--rm $(imageNameUnitTests):$(imageTag)'
 
 # - task: Docker@2
 #   displayName: "Build intergration tests"
