@@ -10,7 +10,6 @@ resources:
   pipelines:
   - pipeline: build-pipeline  # This is the alias
     source: 'VojtaKai.kubernetes-build'  # The name of the build pipeline
-    project: '75f14b00-96a5-4d30-b29a-38817d667b10'
     branch: 'release-cd-pipeline'  # or the branch your build pipeline uses
 
 steps:
