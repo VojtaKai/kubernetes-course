@@ -25,6 +25,7 @@ RUN npm ci
 COPY ["/NorthwindStore.App/Styles/", "Styles/"]
 RUN npm run build
 
+
 FROM build AS publish
 COPY --from=build-node /NorthwindStore.App/wwwroot wwwroot/
 RUN dotnet publish "NorthwindStore.App.csproj" -c Release -o /app/publish
