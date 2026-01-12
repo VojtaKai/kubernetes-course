@@ -15,10 +15,9 @@ resources:
 steps:
 - task: DownloadPipelineArtifact@2
   inputs:
-    buildType: 'specific'
-    project: '75f14b00-96a5-4d30-b29a-38817d667b10'
-    pipeline: '1'
-    buildVersionToDownload: 'latest'
+    buildType: 'pipeline'
+    pipeline: build-pipeline
+    buildVersionToDownload: '$(Resources.Pipeline.build-pipeline.RunId)'
     artifactName: 'app'
     downloadPath: '$(System.ArtifactsDirectory)'
 
@@ -39,5 +38,5 @@ steps:
       ingress.hosts[0].paths[0].pathType=Prefix
       ingress.tls[0].hosts[0]=helm.northwindstore.local
       ingress.tls[0].secretName=ingress-tls
-      image.tag=$(Resources.Pipeline.build-pipeline.RunID)
+      image.tag=$(Resources.Pipeline.build-pipeline.RunId)
     valueFile: '$(System.ArtifactsDirectory)/app/values.yaml'
