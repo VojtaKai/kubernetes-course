@@ -1,34 +1,25 @@
 # Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
-
 trigger:
-- azure-ci-pipeline
+ - none
 
 pool:
   vmImage: ubuntu-latest
 
-steps:
-# - task: DownloadBuildArtifacts@1
-#   inputs:
-#     buildType: 'specific'
-#     project: '75f14b00-96a5-4d30-b29a-38817d667b10'
-#     pipeline: '1'
-#     specificBuildWithTriggering: true
-#     buildVersionToDownload: 'specific'
-#     buildId: '44'
-#     downloadType: 'single'
-#     artifactName: 'app'
-#     downloadPath: '$(System.ArtifactsDirectory)'
+# Define the pipeline resource with an alias
+resources:
+  pipelines:
+  - pipeline: build-pipeline  # This is the alias
+    source: 'VojtaKai.kubernetes-build'  # The name of the build pipeline
+    project: '75f14b00-96a5-4d30-b29a-38817d667b10'
+    branch: 'release-cd-pipeline'  # or the branch your build pipeline uses
 
-- task: DownloadBuildArtifacts@1
+steps:
+- task: DownloadPipelineArtifact@2
   inputs:
     buildType: 'specific'
     project: '75f14b00-96a5-4d30-b29a-38817d667b10'
     pipeline: '1'
     buildVersionToDownload: 'latest'
-    downloadType: 'single'
     artifactName: 'app'
     downloadPath: '$(System.ArtifactsDirectory)'
 
@@ -49,4 +40,5 @@ steps:
       ingress.hosts[0].paths[0].pathType=Prefix
       ingress.tls[0].hosts[0]=helm.northwindstore.local
       ingress.tls[0].secretName=ingress-tls
+      image.tag=$(Resources.Pipeline.build-pipeline.RunID)
     valueFile: '$(System.ArtifactsDirectory)/app/values.yaml'
