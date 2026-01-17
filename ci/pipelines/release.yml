@@ -31,7 +31,7 @@ steps:
     namespace: 'northwindstore-helm'
     command: 'upgrade'
     chartType: 'FilePath'
-    chartPath: '$(Pipeline.Workspace)/app'
+    chartPath: '$(Pipeline.Workspace)/build-pipeline/app'
     releaseName: 'northwindstore'
     overrideValues: |
       ingress.hosts[0].host=helm.northwindstore.local
@@ -40,4 +40,4 @@ steps:
       ingress.tls[0].hosts[0]=helm.northwindstore.local
       ingress.tls[0].secretName=ingress-tls
       image.tag=$(buildRunId)
-    valueFile: '$(Pipeline.Workspace)/app/values.yaml'
+    valueFile: '$(Pipeline.Workspace)/build-pipeline/app/values.yaml'
