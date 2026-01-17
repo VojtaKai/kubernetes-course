@@ -21,7 +21,7 @@ variables:
   imageTag: $(Build.BuildId)
   containerRepository: 'northwindstore/app'
   containerRegistry: 'robotdreams.azurecr.io'
-  unusedVariable: 'unused'
+  unusedVariable2: 'unused'
 
 steps:
 - bash: |
