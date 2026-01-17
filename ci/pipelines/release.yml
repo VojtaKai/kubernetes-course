@@ -19,16 +19,9 @@ variables:
   buildRunId: $(resources.pipeline.build-pipeline.runID)
 
 steps:
-- task: DownloadPipelineArtifact@2
-  displayName: Download Helm chart artifact from build pipeline run
-  inputs:
-    buildType: 'specific'
-    project: '$(resources.pipeline.build-pipeline.projectID)'
-    definition: '$(resources.pipeline.build-pipeline.pipelineID)'
-    buildVersionToDownload: 'specific'
-    pipelineId: '$(resources.pipeline.build-pipeline.runID)'
-    artifactName: 'app'
-    targetPath: '$(Pipeline.Workspace)/app'
+- download: build-pipeline
+  artifact: app
+  path: $(Pipeline.Workspace)/app
 
 - task: HelmDeploy@1
   inputs:
