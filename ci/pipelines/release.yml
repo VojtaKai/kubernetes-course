@@ -1,0 +1,77 @@
+# Starter pipeline
+trigger:
+ - none
+
+pool:
+  vmImage: ubuntu-latest
+
+# Define the pipeline resource with an alias
+resources:
+  pipelines:
+  - pipeline: build-pipeline  # This is the alias
+    source: VojtaKai.kubernetes-build  # The name of the build pipeline
+    # branch: refs/heads/release-cd-pipeline  # or the branch your build pipeline uses
+    trigger: none
+
+variables:
+  buildRunId: $(resources.pipeline.build-pipeline.runID)
+
+steps:
+# - task: DownloadPipelineArtifact@2
+#   inputs:
+#     source: 'specific',
+#     pipeline: build-pipeline
+#     buildVersionToDownload: '$(Resources.Pipeline.build-pipeline.RunId)'
+#     artifactName: 'app'
+#     downloadPath: '$(System.ArtifactsDirectory)'
+
+# - task: HelmDeploy@1
+#   inputs:
+#     connectionType: 'Azure Resource Manager'
+#     azureSubscription: '953dfd1d-b9e0-46c2-a58d-c644f04794e3'
+#     azureResourceGroup: 'Kubernetes-Course'
+#     kubernetesCluster: 'robot-dreams-cluster'
+#     namespace: 'northwindstore-helm'
+#     command: 'upgrade'
+#     chartType: 'FilePath'
+#     chartPath: '$(System.ArtifactsDirectory)/app'
+#     releaseName: 'northwindstore'
+#     overrideValues: |
+#       ingress.hosts[0].host=helm.northwindstore.local
+#       ingress.hosts[0].paths[0].path=/
+#       ingress.hosts[0].paths[0].pathType=Prefix
+#       ingress.tls[0].hosts[0]=helm.northwindstore.local
+#       ingress.tls[0].secretName=ingress-tls
+#       image.tag=$(Resources.Pipeline.build-pipeline.RunId)
+#     valueFile: '$(System.ArtifactsDirectory)/app/values.yaml'
+
+- task: DownloadPipelineArtifact@2
+  displayName: Download Helm chart artifact from build pipeline run
+  inputs:
+    buildType: 'specific'
+    project: '$(resources.pipeline.build-pipeline.projectID)'
+    definition: '$(resources.pipeline.build-pipeline.pipelineID)'
+    buildVersionToDownload: 'specific'
+    pipelineId: '$(resources.pipeline.build-pipeline.runID)'
+    artifactName: 'app'
+    targetPath: '$(Pipeline.Workspace)/app'
+
+- task: HelmDeploy@1
+  inputs:
+    connectionType: 'Azure Resource Manager'
+    azureSubscription: '953dfd1d-b9e0-46c2-a58d-c644f04794e3'
+    azureResourceGroup: 'Kubernetes-Course'
+    kubernetesCluster: 'robot-dreams-cluster'
+    namespace: 'northwindstore-helm'
+    command: 'upgrade'
+    chartType: 'FilePath'
+    chartPath: '$(Pipeline.Workspace)/app'
+    releaseName: 'northwindstore'
+    overrideValues: |
+      ingress.hosts[0].host=helm.northwindstore.local
+      ingress.hosts[0].paths[0].path=/
+      ingress.hosts[0].paths[0].pathType=Prefix
+      ingress.tls[0].hosts[0]=helm.northwindstore.local
+      ingress.tls[0].secretName=ingress-tls
+      image.tag=$(buildRunId)
+    valueFile: '$(Pipeline.Workspace)/app/values.yaml'

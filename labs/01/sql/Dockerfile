@@ -1,4 +1,7 @@
-FROM mcr.microsoft.com/mssql/server:latest
+# FROM mcr.microsoft.com/mssql/server:latest
+# Use this image for MacOS with ARM processors
+FROM mcr.microsoft.com/mssql/server:2022-CU18-ubuntu-22.04 
+
 ENV SA_PASSWORD=DevPass_1
 ENV MSSQL_PID=Express
 ENV ACCEPT_EULA=Y
