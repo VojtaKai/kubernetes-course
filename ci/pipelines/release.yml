@@ -1,6 +1,6 @@
 # Starter pipeline
-trigger:
- - none
+trigger: none
+pr: none
 
 pool:
   vmImage: ubuntu-latest
@@ -19,34 +19,6 @@ variables:
   buildRunId: $(resources.pipeline.build-pipeline.runID)
 
 steps:
-# - task: DownloadPipelineArtifact@2
-#   inputs:
-#     source: 'specific',
-#     pipeline: build-pipeline
-#     buildVersionToDownload: '$(Resources.Pipeline.build-pipeline.RunId)'
-#     artifactName: 'app'
-#     downloadPath: '$(System.ArtifactsDirectory)'
-
-# - task: HelmDeploy@1
-#   inputs:
-#     connectionType: 'Azure Resource Manager'
-#     azureSubscription: '953dfd1d-b9e0-46c2-a58d-c644f04794e3'
-#     azureResourceGroup: 'Kubernetes-Course'
-#     kubernetesCluster: 'robot-dreams-cluster'
-#     namespace: 'northwindstore-helm'
-#     command: 'upgrade'
-#     chartType: 'FilePath'
-#     chartPath: '$(System.ArtifactsDirectory)/app'
-#     releaseName: 'northwindstore'
-#     overrideValues: |
-#       ingress.hosts[0].host=helm.northwindstore.local
-#       ingress.hosts[0].paths[0].path=/
-#       ingress.hosts[0].paths[0].pathType=Prefix
-#       ingress.tls[0].hosts[0]=helm.northwindstore.local
-#       ingress.tls[0].secretName=ingress-tls
-#       image.tag=$(Resources.Pipeline.build-pipeline.RunId)
-#     valueFile: '$(System.ArtifactsDirectory)/app/values.yaml'
-
 - task: DownloadPipelineArtifact@2
   displayName: Download Helm chart artifact from build pipeline run
   inputs:
