@@ -21,7 +21,6 @@ variables:
 steps:
 - download: build-pipeline
   artifact: app
-  path: $(Pipeline.Workspace)/app
 
 - task: HelmDeploy@1
   inputs:
