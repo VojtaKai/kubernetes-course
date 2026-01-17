@@ -10,8 +10,10 @@ resources:
   pipelines:
   - pipeline: build-pipeline  # This is the alias
     source: VojtaKai.kubernetes-build  # The name of the build pipeline
-    # branch: refs/heads/release-cd-pipeline  # or the branch your build pipeline uses
-    trigger: none
+    trigger:
+      branches:
+        include:
+          - azure-ci-pipeline
 
 variables:
   buildRunId: $(resources.pipeline.build-pipeline.runID)
