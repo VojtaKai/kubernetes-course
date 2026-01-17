@@ -158,6 +158,15 @@ containerEnv: [
         key: ConnectionStrings__DB,
       }
     }
+  },
+  {
+    name: ApplicationInsights__InstrumentationKey,
+    valueFrom: {
+      secretKeyRef: {
+        name: app,
+        key: ApplicationInsights__InstrumentationKey,
+      }
+    }
   }
 ]
 
