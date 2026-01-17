@@ -13,7 +13,7 @@ resources:
     trigger:
       branches:
         include:
-          - refs/heads/azure-ci-pipeline
+          - azure-ci-pipeline
 
 variables:
   buildRunId: $(resources.pipeline.build-pipeline.runID)
